@@ -1,9 +1,10 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 function EmployeeProfile() {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [employee, setEmployee] = useState({
     id: 0,
@@ -13,20 +14,53 @@ function EmployeeProfile() {
   });
 
   useEffect(() => {
-   
     axios
       .get(`http://localhost:8080/getById?id=${id}`)
       .then((response) => setEmployee(response.data))
-      .catch((error)=> alert(error.message || 'Something went wrong'));
+      .catch((error) => alert(error.message || "Something went wrong"));
   }, []);
 
   const inputHandler = (e) => {
     const { name, value } = e.target;
     setEmployee((old) => ({ ...old, [name]: value }));
   };
+
+  const update = (e) => {
+    e.preventDefault();
+
+    axios
+      .put("http://localhost:8080/update", {
+        id: id,
+        name: employee.name,
+        email: employee.email,
+        password: employee.password,
+      })
+      .then((response) => {
+        if (response.data) {
+          alert("Updated");
+          navigate("/dashboard");
+        }
+      })
+      .catch((error) => alert(error.message || "Something went wrong"));
+
+    reset();
+  };
+
+  const reset = () => {
+    setEmployee({
+      id: 0,
+      name: "",
+      email: "",
+      password: "",
+    });
+  };
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <form className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md">
+      <form
+        onSubmit={update}
+        className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md"
+      >
         <h2 className="text-2xl font-semibold text-center mb-6 text-gray-700">
           Update Employee
         </h2>
