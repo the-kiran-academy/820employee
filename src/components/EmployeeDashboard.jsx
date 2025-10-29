@@ -1,8 +1,11 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function EmployeeDashboard() {
   const [employees, setEmployees] = useState([]);
+
+  const navigate=useNavigate();
 
   useEffect(() => {
     axios
@@ -10,6 +13,31 @@ function EmployeeDashboard() {
       .then((response) => setEmployees(response.data))
       .catch(() => console.log("Something went wrong"));
   }, []);
+
+  const deleteEmployee = (id) => {
+    //http://localhost:8080/delete?id=1
+
+    axios
+      .delete(`http://localhost:8080/delete?id=${id}`)
+      .then((response) => {
+        if (response.data === true) {
+          alert("deleted");
+
+          const remainingEmp = employees.filter((emp) => emp.id != id);
+
+          setEmployees(remainingEmp);
+        } else {
+          alert("Not Deleted");
+        }
+      })
+      .catch((error) => alert(error.mrssage || "something went wromg"));
+  };
+
+  const showEmployee = (id) => {
+    // nevigate to EmployeeProfile with specific Id
+
+    navigate(`/employee-profile/${id}`);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center py-10">
@@ -27,6 +55,7 @@ function EmployeeDashboard() {
                 <th className="py-3 px-4 text-left">Name</th>
                 <th className="py-3 px-4 text-left">Email</th>
                 <th className="py-3 px-4 text-left">Password</th>
+                <th className="py-3 px-4 text-left">Actions</th>
               </tr>
             </thead>
 
@@ -44,6 +73,21 @@ function EmployeeDashboard() {
                     </td>
                     <td className="py-3 px-4">{emp.email}</td>
                     <td className="py-3 px-4 text-gray-600">{emp.password}</td>
+                    <td className="py-3 px-4">
+                      <button
+                        onClick={() => deleteEmployee(emp.id)}
+                        className="bg-red-500 text-white px-3 py-1 mr-3 rounded-lg hover:bg-red-400 transition"
+                      >
+                        Delete
+                      </button>
+
+                      <button
+                        onClick={() => showEmployee(emp.id)}
+                        className="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-red-400 transition"
+                      >
+                        Show
+                      </button>
+                    </td>
                   </tr>
                 ))
               ) : (
